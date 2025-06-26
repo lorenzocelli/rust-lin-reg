@@ -1,9 +1,4 @@
-use std::{
-    vec::Vec,
-    error::Error,
-    fs::File,
-    process,
-};
+use std::{error::Error, fs::File, process, vec::Vec};
 
 use ndarray::prelude::*;
 use ndarray_linalg::cholesky::*;
@@ -68,7 +63,7 @@ fn run() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn lin_reg (x: &Array1<f64>, y: &Array1<f64>) -> (f64, f64) {
+fn lin_reg(x: &Array1<f64>, y: &Array1<f64>) -> (f64, f64) {
     let x_mean: f64 = x.mean().unwrap();
     let y_mean: f64 = y.mean().unwrap();
 
@@ -87,15 +82,15 @@ fn lin_reg (x: &Array1<f64>, y: &Array1<f64>) -> (f64, f64) {
     return (b0, b1);
 }
 
-fn lin_reg_mult (x: &Array2<f64>, y: &Array1<f64>) -> Result<Array1<f64>, LinalgError> {
-    let mut a =  x.t().dot(x);
-    let b : Array1<f64> = x.t().dot(y);
+fn lin_reg_mult(x: &Array2<f64>, y: &Array1<f64>) -> Result<Array1<f64>, LinalgError> {
+    let mut a = x.t().dot(x);
+    let b: Array1<f64> = x.t().dot(y);
 
     // Avoid singular matrix
     for i in 0..x.shape()[1] {
-        a[[i, i]] += 1e-10; 
+        a[[i, i]] += 1e-10;
     }
-    
+
     a.solvec(&b)
 }
 
