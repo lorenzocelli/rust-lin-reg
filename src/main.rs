@@ -1,8 +1,6 @@
 use std::{
-    env,
     vec::Vec,
-    error::Error, 
-    ffi::OsString,
+    error::Error,
     fs::File,
     process,
 };
@@ -21,48 +19,58 @@ fn main() {
 }
 
 fn run() -> Result<(), Box<dyn Error>> {
-    let file = File::open(get_arg(1)?)?;
+    let file = File::open("Advertising.csv")?;
     let mut rdr = csv::Reader::from_reader(file);
 
-    let mut x: Vec<f64> = Vec::new();
-    let mut y: Vec<f64> = Vec::new();
+    let mut data: Vec<Record> = Vec::new();
 
     for result in rdr.deserialize() {
         let record: Record = result?;
-        x.push(record.1);
-        y.push(record.4);
+        data.push(record);
+    }
+
+    let n = data.len();
+
+    let mut x: Array1<f64> = Array::zeros(n);
+    let mut y: Array1<f64> = Array::zeros(n);
+
+    // Extract 'TV' and 'Sales' columns
+    for i in 0..n {
+        x[i] = data[i].1;
+        y[i] = data[i].4;
     }
 
     let (b0, b1) = lin_reg(&x, &y);
 
     println!("[{}, {}]", b0, b1);
 
-    let n = x.len();
-    let mut x_arr = Array::<f64, _>::ones((n, 2).f());
-    let y_arr = Array::from_shape_vec((n).f(), y).unwrap();
+    // Compute the residual standard error
+    let err = rse(&y, &(b0 + &x * b1));
+    println!("RSE: {}", err);
 
+    let mut x_mult: Array2<f64> = Array::ones((n, 4));
+
+    // Extract 'TV', 'Radio', and 'Newspaper' columns
     for i in 0..n {
-        x_arr[[i, 1]] = x[i];
+        x_mult[[i, 1]] = data[i].1;
+        x_mult[[i, 2]] = data[i].2;
+        x_mult[[i, 3]] = data[i].3;
     }
 
-    let b = lin_reg_mult(&x_arr, &y_arr)?;
+    let b = lin_reg_mult(&x_mult, &y)?;
 
     println!("{}", b);
+
+    // Compute the average squared error for multiple regression
+    let err_m = rse(&y, &(x_mult.dot(&b)));
+    println!("RSE: {}", err_m);
 
     Ok(())
 }
 
-fn lin_reg (x: &Vec<f64>, y: &Vec<f64>) -> (f64, f64) {
-    let mut x_mean: f64 = 0.0;
-    let mut y_mean: f64 = 0.0;
-
-    for i in 0..x.len() {
-        x_mean += x[i];
-        y_mean += y[i];
-    }
-
-    x_mean /= x.len() as f64;
-    y_mean /= y.len() as f64;
+fn lin_reg (x: &Array1<f64>, y: &Array1<f64>) -> (f64, f64) {
+    let x_mean: f64 = x.mean().unwrap();
+    let y_mean: f64 = y.mean().unwrap();
 
     let mut b1_num: f64 = 0.0;
     let mut b1_den: f64 = 0.0;
@@ -82,18 +90,17 @@ fn lin_reg (x: &Vec<f64>, y: &Vec<f64>) -> (f64, f64) {
 fn lin_reg_mult (x: &Array2<f64>, y: &Array1<f64>) -> Result<Array1<f64>, LinalgError> {
     let mut a =  x.t().dot(x);
     let b : Array1<f64> = x.t().dot(y);
-    
+
     // Avoid singular matrix
     for i in 0..x.shape()[1] {
-        a[[i, i]] += 1e-8; 
+        a[[i, i]] += 1e-10; 
     }
-
+    
     a.solvec(&b)
 }
 
-fn get_arg(i: usize) -> Result<OsString, Box<dyn Error>> {
-    match env::args_os().nth(i) {
-        None => Err(From::from("expected 1 argument, but got none")),
-        Some(file_path) => Ok(file_path),
-    }
+fn rse(y: &Array1<f64>, y_hat: &Array1<f64>) -> f64 {
+    let n = y.len() as f64;
+    let err = y - y_hat;
+    ((&err * &err).sum() / (n - 2.0)).sqrt()
 }
