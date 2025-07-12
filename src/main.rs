@@ -67,14 +67,11 @@ fn lin_reg(x: &Array1<f64>, y: &Array1<f64>) -> (f64, f64) {
     let x_mean: f64 = x.mean().unwrap();
     let y_mean: f64 = y.mean().unwrap();
 
-    let mut b1_num: f64 = 0.0;
-    let mut b1_den: f64 = 0.0;
+    let x_dev = x - x_mean;
+    let y_dev = y - y_mean;
 
-    for i in 0..x.len() {
-        let x_dev: f64 = x[i] - x_mean;
-        b1_num += x_dev * (y[i] - y_mean);
-        b1_den += x_dev * x_dev;
-    }
+    let b1_num = (&x_dev * &y_dev).sum();
+    let b1_den = (&x_dev * &x_dev).sum();
 
     let b1: f64 = b1_num / b1_den;
     let b0: f64 = y_mean - b1 * x_mean;
