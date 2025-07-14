@@ -29,7 +29,7 @@ fn run() -> Result<(), Box<dyn Error>> {
     let mut x: Array1<f64> = Array::zeros(n);
     let mut y: Array1<f64> = Array::zeros(n);
 
-    // Extract 'TV' and 'Sales' columns
+    // Extract 'TV' and 'sales' columns
     for i in 0..n {
         x[i] = data[i].1;
         y[i] = data[i].4;
@@ -45,7 +45,7 @@ fn run() -> Result<(), Box<dyn Error>> {
 
     let mut x_mult: Array2<f64> = Array::ones((n, 4));
 
-    // Extract 'TV', 'Radio', and 'Newspaper' columns
+    // Extract 'TV', 'radio', and 'newspaper' columns
     for i in 0..n {
         x_mult[[i, 1]] = data[i].1;
         x_mult[[i, 2]] = data[i].2;
