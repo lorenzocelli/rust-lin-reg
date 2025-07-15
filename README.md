@@ -1,4 +1,6 @@
-# Linear Regression with Rust
+# Linear Regression in Rust
+
+Codebase for the blog post ['Linear Regression in Rust'](http://lorenzocelli.me/2025/06/28/linear-regression-in-Rust.html).
 
 This project implements a simple ordinary least squares linear regression model in Rust. It leverages [ndarray](https://github.com/rust-ndarray/ndarray) to store data points and [ndarray-linalg](https://github.com/rust-ndarray/ndarray-linalg) to solve the linear system.
 
