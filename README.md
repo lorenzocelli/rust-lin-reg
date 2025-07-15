@@ -8,7 +8,7 @@ The sample csv dataset comes from the online resources of the book ['Introductio
 
 ## Usage
 
-Build the project with `cargo build` and run the exectuable (e.g. `./target/debug/rust-lin-reg`). The program will load the 'Advertising.csv' dataset, print the linear regression coefficients, and compute the residual standard error (RSE) for both simple and multiple regression.
+Build and run the project with `cargo run`. The program will load the 'Advertising.csv' dataset, print the linear regression coefficients, and compute the residual standard error (RSE) for both simple and multiple regression.
 
 ```bash
 [7.032593549127704, 0.04753664043301969]
